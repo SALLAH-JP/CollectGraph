@@ -1,22 +1,58 @@
-# WasteGraph — Collecte des Déchets
+<div align="center">
 
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-2.0%2B-green)](https://flask.palletsprojects.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-12%2B-336791)](https://www.postgresql.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+# 🗺️ CollectGraph
 
-## 📋 Description
+### *Optimisation de tournées de collecte de déchets par théorie des graphes*
 
-**WasteGraph** est une application web interactive pour optimiser les routes de collecte des déchets. Elle permet de visualiser un graphe de collecte, calculer les chemins optimaux entre deux points et assigner des équipes/jours à différentes zones de collecte.
+**Application web interactive permettant de modéliser un réseau de collecte sous forme de graphe, de calculer les trajets optimaux entre points (Dijkstra) et d'assigner des équipes par zones via coloration de graphe.**
 
-### Fonctionnalités principales
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-2.0+-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-12+-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-Canvas%20API-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
 
-- 🗺️ **Visualisation interactive** d'un graphe en Canvas
-- 🛣️ **Algorithme de Dijkstra** pour trouver le chemin le plus court
-- 🎨 **Coloration de graphe** pour l'assignation d'équipes/jours
-- ✏️ **Édition dynamique** : ajout/suppression de nœuds et arêtes
-- 💾 **Persistance PostgreSQL** des données
-- 🔄 **API REST** complète
+[**🧮 Algorithmes**](#-algorithmes-implémentés) · [**🚀 Installation**](#-installation) · [**🔌 API REST**](#-api-rest)
+
+</div>
+
+---
+
+## 📋 Sommaire
+
+- [À propos](#-à-propos)
+- [Fonctionnalités](#-fonctionnalités)
+- [Installation](#-installation)
+- [Utilisation](#-guide-dutilisation)
+- [API REST](#-api-rest)
+- [Algorithmes](#-algorithmes-implémentés)
+- [Technologies](#%EF%B8%8F-technologies-utilisées)
+- [Structure du projet](#-structure-du-projet)
+- [Auteur](#-auteur)
+- [Licence](#-licence)
+
+---
+
+## 🎯 À propos
+
+**CollectGraph** est un projet académique de **théorie des graphes appliquée** à un problème concret : l'optimisation des tournées de collecte de déchets en milieu urbain. L'application combine la **modélisation visuelle** d'un réseau de routes (graphe pondéré) avec deux algorithmes classiques :
+
+- 🛣️ **Dijkstra** pour trouver le **chemin le plus court** entre deux points
+- 🎨 **Coloration gloutonne** pour **répartir les zones** de collecte entre équipes ou jours de la semaine
+
+L'interface est entièrement **interactive** : on dessine le graphe à la souris sur un Canvas HTML5, on visualise les résultats en temps réel, et les données sont **persistées** dans une base PostgreSQL.
+
+---
+
+## ✨ Fonctionnalités
+
+- 🗺️ **Visualisation interactive** du graphe sur Canvas HTML5
+- ✏️ **Édition dynamique** : ajout/suppression de nœuds et arêtes à la souris
+- ⚖️ **Arêtes pondérées** (distance/temps)
+- 🛣️ **Algorithme de Dijkstra** : chemin optimal entre deux nœuds
+- 🎨 **Coloration de graphe** : assignation automatique d'équipes/jours
+- 💾 **Persistance PostgreSQL** : les modifications sont sauvegardées
+- 🔄 **API REST complète** : intégration possible avec d'autres systèmes
 
 ---
 
@@ -24,38 +60,48 @@
 
 ### Prérequis
 
-- Python 3.8 ou supérieur
-- PostgreSQL 12 ou supérieur
-- Node.js (optionnel, pour la gestion des dépendances frontend)
+- **Python 3.8** ou supérieur
+- **PostgreSQL 12** ou supérieur
+- pip
 
-### Étapes d'installation
+### 1. Cloner le repo
 
-1. **Cloner le repository**
 ```bash
-git clone https://github.com/votre-username/WasteGraph.git
-cd WasteGraph
+git clone https://github.com/SALLAH-JP/TG.git
+cd TG
 ```
 
-2. **Créer un environnement virtuel Python**
+### 2. Environnement virtuel Python
+
 ```bash
 python -m venv venv
-source venv/bin/activate  # Sur Windows : venv\Scripts\activate
+# Windows
+venv\Scripts\activate
+# Linux / macOS
+source venv/bin/activate
 ```
 
-3. **Installer les dépendances Python**
+### 3. Dépendances Python
+
 ```bash
 pip install flask flask-cors psycopg2-binary
 ```
 
-4. **Configurer PostgreSQL**
+### 4. Configurer PostgreSQL
 
-Créer une base de données et les tables :
+Créer la base et importer le schéma :
+
+```bash
+# Créer la base
+createdb TG
+
+# Importer le schéma (à la racine du repo)
+psql -d TG -f TG.sql
+```
+
+Schéma simplifié :
 
 ```sql
-CREATE DATABASE TG;
-
-\c TG;
-
 CREATE TABLE nodes (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL,
@@ -74,43 +120,28 @@ CREATE TABLE edges (
 );
 ```
 
-5. **Configurer les identifiants PostgreSQL**
+### 5. Configurer la connexion
 
-Éditer `app.py` et vérifier les paramètres de connexion :
+Modifier les identifiants PostgreSQL dans `server.py` :
 
 ```python
 def get_connection():
     return psycopg2.connect(
         dbname="TG",
         user="postgres",
-        password="YOUR_PASSWORD",  # À remplacer
+        password="VOTRE_MOT_DE_PASSE",
         host="localhost",
         port=5432
     )
 ```
 
-6. **Lancer l'application**
+### 6. Lancer l'application
+
 ```bash
-python app.py
+python server.py
 ```
 
-L'application sera accessible à `http://localhost:5000`
-
----
-
-## 📁 Structure du projet
-
-```
-WasteGraph/
-├── app.py                      # Backend Flask
-├── templates/
-│   └── index.html             # Interface HTML
-├── static/
-│   ├── app.js                 # Logique frontend JavaScript
-│   └── style.css              # Feuille de styles
-├── README.md
-└── requirements.txt           # Dépendances Python
-```
+L'application est accessible sur **http://localhost:5000**
 
 ---
 
@@ -118,60 +149,51 @@ WasteGraph/
 
 ### Interface principale
 
-L'application affiche :
-- **Zone centrale** : Canvas avec la visualisation du graphe
-- **Barre d'outils** : Sélection source/destination et boutons d'action
-- **Panneau latéral** : Légende des équipes et résultats
+- **Canvas central** : visualisation du graphe (nœuds + arêtes pondérées)
+- **Barre d'outils** : sélection de l'action en cours, choix source/destination
+- **Panneau latéral** : légende des équipes et résultats des calculs
 
-### Opérations disponibles
+### Actions disponibles
 
-#### 1. **Ajouter un nœud**
-1. Sélectionner "Ajouter un nœud" dans le menu déroulant
-2. Cliquer sur "OK"
-3. Cliquer sur le canvas pour placer le nœud
-4. Entrer le nom du nœud (auto-incrémenté si vide)
-5. Appuyer sur "Entrée"
+#### ➕ Ajouter un nœud
+1. Sélectionner *« Ajouter un nœud »* dans le menu
+2. Cliquer **OK**
+3. Cliquer sur le canvas pour le placer
+4. Entrer un nom (auto-incrémenté si vide) puis **Entrée**
 
-#### 2. **Supprimer un nœud**
-1. Sélectionner "Supprimer un nœud"
-2. Cliquer sur "OK"
-3. Cliquer sur le nœud à supprimer
-4. Les arêtes associées sont supprimées automatiquement
+#### ❌ Supprimer un nœud
+1. Sélectionner *« Supprimer un nœud »* → **OK**
+2. Cliquer sur le nœud à supprimer
+3. Les arêtes liées sont supprimées en cascade
 
-#### 3. **Ajouter une arête**
-1. Sélectionner "Ajouter une arête"
-2. Cliquer sur "OK"
-3. Cliquer sur le premier nœud (source)
-4. Cliquer sur le second nœud (destination)
-5. Entrer le poids/distance de l'arête
-6. Appuyer sur "Entrée"
+#### ↔️ Ajouter une arête
+1. Sélectionner *« Ajouter une arête »* → **OK**
+2. Cliquer sur le nœud source
+3. Cliquer sur le nœud destination
+4. Entrer le poids (distance/temps) → **Entrée**
 
-#### 4. **Supprimer une arête**
-1. Sélectionner "Supprimer une arête"
-2. Cliquer sur "OK"
-3. Cliquer sur l'arête à supprimer
+#### 🚮 Supprimer une arête
+1. Sélectionner *« Supprimer une arête »* → **OK**
+2. Cliquer sur l'arête
 
-#### 5. **Rechercher le chemin optimal**
-1. Sélectionner la source dans le menu "Source"
-2. Sélectionner la destination dans le menu "Destination"
-3. Cliquer sur "Rechercher (Dijkstra)"
-4. Le chemin et la distance s'affichent dans le panneau latéral
+#### 🛣️ Chercher le chemin optimal
+1. Choisir la source et la destination dans les menus déroulants
+2. Cliquer **Rechercher (Dijkstra)**
+3. Le chemin est surligné sur le canvas et la distance affichée
 
-#### 6. **Assigner des équipes/jours**
-1. Cliquer sur "Colorier (jours/équipes)"
-2. Les nœuds sont colorés selon leur assignation
-3. La légende affiche les couleurs et équipes
+#### 🎨 Assigner les équipes
+1. Cliquer **Colorier (jours/équipes)**
+2. Les nœuds sont automatiquement colorés selon leur assignation
+3. La légende affiche la correspondance couleur ↔ équipe
 
 ---
 
 ## 🔌 API REST
 
-### Endpoints disponibles
+### GET `/graph`
 
-#### **GET /graph**
-Récupère tous les nœuds et arêtes
+Retourne le graphe complet.
 
-**Réponse :**
 ```json
 {
   "nodes": [
@@ -184,57 +206,42 @@ Récupère tous les nœuds et arêtes
 }
 ```
 
-#### **POST /graph/node**
-Ajoute un nœud
+### POST `/graph/node`
 
-**Requête :**
+Ajoute un nœud.
+
 ```json
-{
-  "name": "N3",
-  "x": 400,
-  "y": 300
-}
+{ "name": "N3", "x": 400, "y": 300 }
 ```
 
-#### **DELETE /graph/node**
-Supprime un nœud
+### DELETE `/graph/node`
 
-**Requête :**
+Supprime un nœud (et ses arêtes en cascade).
+
 ```json
-{
-  "name": "N3"
-}
+{ "name": "N3" }
 ```
 
-#### **POST /graph/edge**
-Ajoute une arête
+### POST `/graph/edge`
 
-**Requête :**
+Ajoute une arête pondérée.
+
 ```json
-{
-  "from": "N1",
-  "to": "N2",
-  "weight": 50
-}
+{ "from": "N1", "to": "N2", "weight": 50 }
 ```
 
-#### **DELETE /graph/edge**
-Supprime une arête
+### DELETE `/graph/edge`
 
-**Requête :**
+Supprime une arête.
+
 ```json
-{
-  "from": "N1",
-  "to": "N2"
-}
+{ "from": "N1", "to": "N2" }
 ```
 
-#### **GET /algo/dijkstra**
-Calcule le chemin optimal entre deux nœuds
+### GET `/algo/dijkstra?src=N1&dst=N2`
 
-**Paramètres :** `src` (source), `dst` (destination)
+Calcule le plus court chemin.
 
-**Réponse :**
 ```json
 {
   "path": ["N1", "N3", "N2"],
@@ -242,10 +249,10 @@ Calcule le chemin optimal entre deux nœuds
 }
 ```
 
-#### **GET /algo/coloring**
-Assigne des couleurs/équipes aux nœuds (coloration de graphe)
+### GET `/algo/coloring`
 
-**Réponse :**
+Coloration du graphe (assignation d'équipes).
+
 ```json
 {
   "N1": 1,
@@ -258,103 +265,116 @@ Assigne des couleurs/équipes aux nœuds (coloration de graphe)
 
 ## 🧮 Algorithmes implémentés
 
-### Dijkstra
-Trouvez le chemin le plus court entre deux nœuds dans un graphe pondéré.
+### 🛣️ Dijkstra
 
-**Complexité :** O((V + E) log V)
+Calcule le **plus court chemin** entre deux nœuds dans un graphe pondéré non-négatif.
 
-### Graph Coloring (Greedy)
-Assignez des couleurs/équipes aux nœuds de manière optimale pour éviter les conflits.
+- **Complexité** : *O((V + E) log V)* avec file de priorité
+- **Implémentation** : `logic.py`
+- **Usage** : optimisation des trajets de collecte entre deux points
 
-**Stratégie :** Tri par degré décroissant + coloration gloutonne
+### 🎨 Coloration de graphe (gloutonne)
+
+Assigne des couleurs (= équipes ou jours) aux nœuds de façon à ce que **deux nœuds adjacents n'aient jamais la même couleur**.
+
+- **Stratégie** : tri des nœuds par **degré décroissant** puis affectation gloutonne
+- **Objectif** : minimiser le nombre d'équipes/jours nécessaires pour couvrir toute la ville
+- **Application** : planification hebdomadaire des tournées
 
 ---
 
 ## 🛠️ Technologies utilisées
 
 ### Backend
-- **Flask** : Framework web léger
-- **Flask-CORS** : Gestion des requêtes cross-origin
-- **psycopg2** : Driver PostgreSQL pour Python
+- **Flask** — micro-framework web Python
+- **Flask-CORS** — gestion des requêtes cross-origin
+- **psycopg2** — driver PostgreSQL
 
 ### Frontend
-- **HTML5 / CSS3** : Structure et style
-- **Canvas API** : Rendu 2D du graphe
-- **JavaScript Vanilla** : Logique interactif
-- **Fetch API** : Communication avec le backend
+- **HTML5 / CSS3** — structure et styles
+- **Canvas API** — rendu 2D interactif du graphe
+- **JavaScript vanilla** — logique frontend, pas de framework
+- **Fetch API** — communication avec le backend
 
 ### Base de données
-- **PostgreSQL** : Persistance des données
+- **PostgreSQL** — stockage des nœuds, arêtes et métadonnées
+
+---
+
+## 📁 Structure du projet
+
+```
+.
+├── server.py              # Backend Flask + routes API
+├── logic.py               # Algorithmes (Dijkstra, coloration)
+├── TG.sql                 # Schéma SQL de la base
+├── public/                # Frontend
+│   ├── index.html         # Page principale
+│   ├── app.js             # Logique Canvas + appels API
+│   └── style.css          # Styles
+├── projet final tg.docx   # Rapport du projet
+└── LICENSE
+```
 
 ---
 
 ## 📊 Exemple de cas d'usage
 
-### Scenario : Optimiser une tournée de collecte
+**Scénario** : Optimiser la collecte des déchets dans une ville de 30 quartiers.
 
-1. **Créer le réseau** : Ajouter des nœuds (points de collecte) et des arêtes (routes)
-2. **Assigner les équipes** : Utiliser la coloration pour répartir les zones par jour
-3. **Optimiser les trajets** : Utiliser Dijkstra pour trouver le chemin le plus court entre deux points
-4. **Valider et mettre à jour** : Les données sont persistées en PostgreSQL
-
----
-
-## 🐛 Troubleshooting
-
-### Erreur de connexion PostgreSQL
-```
-psycopg2.OperationalError: could not connect to server
-```
-✅ Vérifier que PostgreSQL est lancé et que les paramètres de connexion sont corrects
-
-### Arête impossible à ajouter
-✅ Vérifier que les deux nœuds existent et que l'arête n'existe pas déjà
-
-### Canvas vide au démarrage
-✅ Vérifier que des nœuds existent dans la base de données
+1. **Modélisation** — Créer un nœud par quartier, des arêtes pour chaque route (poids = distance ou temps de parcours)
+2. **Répartition** — Lancer la coloration : la ville est divisée en zones distinctes, chacune attribuée à une équipe différente
+3. **Optimisation** — Pour chaque zone, utiliser Dijkstra pour planifier le trajet le plus rapide entre le dépôt et chaque point
+4. **Persistance** — Le réseau est sauvegardé en base, modifiable en temps réel par les opérateurs
 
 ---
 
-## 🔐 Sécurité
+## 🐛 Dépannage
 
-- Utilisation de **requêtes paramétrées** pour prévenir les injections SQL
-- **CORS configuré** pour restreindre les origines autorisées
+**`psycopg2.OperationalError: could not connect to server`**
+→ PostgreSQL n'est pas démarré, ou les identifiants dans `server.py` sont incorrects.
+
+**Canvas vide au démarrage**
+→ La base est vide. Ajouter des nœuds manuellement via l'interface, ou importer un jeu de données initial dans `TG.sql`.
+
+**Arête impossible à ajouter**
+→ Vérifier que les deux nœuds existent et que l'arête n'existe pas déjà entre eux.
+
+---
+
+## 🔒 Sécurité
+
+- **Requêtes paramétrées** : protection contre les injections SQL
+- **CORS** configuré pour limiter les origines autorisées
 - Gestion des erreurs côté serveur
 
 ---
 
-## 📝 Licence
+## 📚 Contexte académique
 
-Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
----
-
-## 🤝 Contribution
-
-Les contributions sont bienvenues ! Pour contribuer :
-
-1. Fork le repository
-2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
+Ce projet a été réalisé dans le cadre du cours de **Théorie des Graphes** de la **Licence Informatique Appliquée** à l'Université des Mascareignes. Le rapport complet est disponible dans le dépôt (`projet final tg.docx`).
 
 ---
 
-## 📧 Contact
+## 👤 Auteur
 
-**Auteur** : [Votre nom]  
-**Email** : [votre.email@example.com]  
-**GitHub** : [votre-username]
+**SALLAH Assiongbon Théodore Jean-Paul**
+Étudiant en 3ème année — Licence Informatique Appliquée
+🎓 Université des Mascareignes (Maurice)
 
----
-
-## 🙏 Remerciements
-
-- Flask et la communauté Python
-- PostgreSQL pour la fiabilité
-- Inspiration des algorithmes classiques de théorie des graphes
+[![GitHub](https://img.shields.io/badge/GitHub-SALLAH--JP-181717?logo=github)](https://github.com/SALLAH-JP)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Jean--Paul%20SALLAH-0A66C2?logo=linkedin)](https://www.linkedin.com/in/jeanpaul-sallah/)
 
 ---
 
-**Dernière mise à jour** : Novembre 2025
+## 📜 Licence
+
+Ce projet est distribué sous licence **MIT** — voir le fichier [`LICENSE`](LICENSE).
+
+---
+
+<div align="center">
+
+*Si ce projet vous a plu, n'hésitez pas à laisser une ⭐ !*
+
+</div>
